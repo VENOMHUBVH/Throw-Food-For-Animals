@@ -1,14 +1,45 @@
 -- VENOM HUB | key: VENOM-HUB-8492-7316 | 24h
--- Version: v1.1.7 (Loadstring Crash Fix)
+-- Locked to Game: Throw Food For Animals
+-- Version: v1.3.1
+
+local isCorrectGame = false
+pcall(function()
+ local success, info = pcall(game.GetService, game, "MarketplaceService")
+ if success and info then
+  local pcall_success, productInfo = pcall(info.GetProductInfo, info, game.PlaceId)
+  if pcall_success and productInfo and productInfo.Name then
+   if productInfo.Name:find("Throw Food") or productInfo.Name:find("Throw Food For Animals") then
+    isCorrectGame = true
+   end
+  end
+ end
+end)
+
+if not isCorrectGame then
+ warn("[VENOM HUB] This script only works in 'Throw Food For Animals'")
+ return
+end
 
 local P,S,R,U,V,T,C,L,St=game:GetService("Players"),game:GetService("SoundService"),game:GetService("ReplicatedStorage"),game:GetService("UserInputService"),game:GetService("VirtualUser"),game:GetService("TweenService"),game:GetService("CoreGui"),game:GetService("Lighting"),game:GetService("Stats")
 local Ws,RS,LP=game:GetService("Workspace"),game:GetService("RunService"),P.LocalPlayer
 local KEY,DC,DUR="VENOM-HUB-8492-7316","https://discord.gg/upsFFfUbCY",86400
-local VERSION="v1.1.7"
+local VERSION="v1.3.1"
 
--- KEY SYSTEM
-local function rd() pcall(function() if readfile and isfile and isfile(".venom_key") then return tonumber(readfile(".venom_key")) end end) return tonumber(LP:GetAttribute("VK")) end
-local function wr(t) pcall(function() if writefile then writefile(".venom_key", tostring(t)) end end) pcall(function() LP:SetAttribute("VK", t) end) end
+local function rd()
+ pcall(function()
+  if readfile and isfile and isfile(".venom_key") then
+   return tonumber(readfile(".venom_key"))
+  end
+ end)
+ return tonumber(LP:GetAttribute("VK"))
+end
+
+local function wr(t)
+ pcall(function()
+  if writefile then writefile(".venom_key", tostring(t)) end
+ end)
+ pcall(function() LP:SetAttribute("VK", t) end)
+end
 
 local function gate()
  local g=Instance.new("ScreenGui") g.Name="VenomKeyGate" g.ResetOnSpawn=false g.IgnoreGuiInset=true g.DisplayOrder=1e6
@@ -104,7 +135,7 @@ local function hub()
 
  local function scanGameChanges()
   local errs = {}
-  local remotesNeeded = {"Throw_Start", "Throw_Resolve", "Throw_Complete", "Throw_Cancel", "Throw_UseSuper", "Claim_Offline", "Shop_ClaimGifts", "Claim_Gifts", "Plot_EquipBest", "Plot_UpgradeFence", "Shop_BuyBest", "Shop_EquipBest", "Stand_Upgrade", "Training_Start"}
+  local remotesNeeded = {"Throw_Start", "Throw_Resolve", "Throw_Complete", "Throw_Cancel", "Throw_UseSuper", "Throw_UseSandwich", "Offline_Claim", "Gift_Request", "Shop_ClaimFree", "Plot_EquipBest", "Plot_UpgradeFence", "Plot_SellAll", "Stand_Upgrade", "Training_Start"}
   for _, r in ipairs(remotesNeeded) do
    if not rem(r) then table.insert(errs, "Missing Remote: " .. r) end
   end
@@ -125,41 +156,18 @@ local function hub()
  task.spawn(function() task.wait(3) scanGameChanges() end)
  task.spawn(function() while A do task.wait(10) scanGameChanges() end end)
 
- -- FIX: Safe hooking for ThrowMeter
  if not _G.__TMN and TM and type(TM.new)=="function" then _G.__TMN=TM.new end
  if not _G.__TMR and TM and type(TM.Run)=="function" then _G.__TMR=TM.Run end
- if TM and _G.__TMN and type(TM.new)=="function" then 
+ if TM and _G.__TMN then 
      TM.new=function(...) local i=_G.__TMN(...) if i and type(i.Run)=="function" then local r=i.Run i.Run=function(s,...) if not A then return r(s,...) end if S.ATh or os1 or spm then if S.Pf then task.wait(.28) local ratings=GC and GC.Throw and GC.Throw.MeterRatings local maxR=(ratings and ratings[#ratings]) or {Text="PERFECT!",Color=Color3.fromRGB(0,255,136)} local bonus=(GC and GC.Throw and GC.Throw.MeterBonusStuds) or 20 return 1, maxR, bonus end task.wait(.25) return .85,nil,10 end return r(s,...) end end return i end 
  end
- if TM and _G.__TMR and type(TM.Run)=="function" then 
+ if TM and _G.__TMR then 
      TM.Run=function(s,...) if not A then return _G.__TMR(s,...) end if S.ATh or os1 or spm then if S.Pf then task.wait(.28) local ratings=GC and GC.Throw and GC.Throw.MeterRatings local maxR=(ratings and ratings[#ratings]) or {Text="PERFECT!",Color=Color3.fromRGB(0,255,136)} local bonus=(GC and GC.Throw and GC.Throw.MeterBonusStuds) or 20 return 1, maxR, bonus end task.wait(.25) return .85,nil,10 end return _G.__TMR(s,...) end 
  end
  if not _G.__RSP and RSq and type(RSq.Play)=="function" then _G.__RSP=RSq.Play end
- if RSq and _G.__RSP and type(RSq.Play)=="function" then RSq.Play=function(p,...) if not A then return _G.__RSP(p,...) end if (S.ATh or os1 or spm) and S.SC then task.wait(.12) return end return _G.__RSP(p,...) end end
+ if RSq and _G.__RSP then RSq.Play=function(p,...) if not A then return _G.__RSP(p,...) end if (S.ATh or os1 or spm) and S.SC then task.wait(.12) return end return _G.__RSP(p,...) end end
 
- -- FIX: Safe firesignal / getconnections
- local function fb(b) 
-  if not A or not b or not b:IsA("GuiButton") then return end 
-  pcall(function() 
-   if type(firesignal) == "function" then 
-    firesignal(b.Activated) 
-    firesignal(b.MouseButton1Click) 
-   end 
-  end) 
-  pcall(function() 
-   if type(getconnections) == "function" then 
-    for _,sg in ipairs({b.Activated,b.MouseButton1Click}) do 
-     local o,cs=pcall(getconnections,sg) 
-     if o and type(cs) == "table" then 
-      for _,c in ipairs(cs) do 
-       if type(c.Fire) == "function" then c:Fire() 
-       elseif type(c.Function) == "function" then c.Function() end 
-      end 
-     end 
-    end 
-   end 
-  end) 
- end
+ local function fb(b) if not A or not b or not b:IsA("GuiButton") then return end pcall(function() if firesignal then firesignal(b.Activated) firesignal(b.MouseButton1Click) end end) pcall(function() if getconnections then for _,sg in ipairs({b.Activated,b.MouseButton1Click}) do local o,cs=pcall(getconnections,sg) if o and cs then for _,c in ipairs(cs) do if type(c.Fire)=="function" then c:Fire() elseif type(c.Function)=="function" then c.Function() end end end end end end) end
  local function ct(b) if not A or not S.ATp then return end if b and b:IsA("ImageButton") and b.Parent and b.Parent.Name=="TapBonusLayer" then task.defer(function() if b.Parent then for k=1,3 do fb(b) task.wait(.02) end end end) end end
  on(LP.PlayerGui.DescendantAdded,function(d) if not A then return end if d:IsA("ImageButton") and d.Parent and d.Parent.Name=="TapBonusLayer" then ct(d) end end)
  on(RS.Heartbeat,function() if not A then return end if S.ATp then local ts=LP.PlayerGui:FindFirstChild("TrainingSequence") local ly=ts and ts:FindFirstChild("TapBonusLayer") if ly then for _,b in ipairs(ly:GetChildren()) do if b:IsA("ImageButton") and b.Active and b.Parent then ct(b) end end end end if S.ATr and S.FT then local h=gh() if h then for _,t in ipairs(h:GetPlayingAnimationTracks()) do local n=t.Name:lower() if n:find("train") or n:find("pull") or n:find("bar") or n:find("workout") or (t.Length>0 and t.Speed==1) then if t.Speed~=S.TS and t.Speed>0 then t:AdjustSpeed(S.TS) end end end end end end)
@@ -170,7 +178,19 @@ local function hub()
  local function tp(cf) if not A then return end local h=grp() if h then h.CFrame=typeof(cf)=="CFrame" and cf or CFrame.new(cf) end end
  local function pl() if not A then return false end local h=grp() if not h then return false end local c=cl() if c then if h.Position.Z>c.Position.Z-4 then h.CFrame=CFrame.new(c.Position.X,c.Position.Y+2,c.Position.Z-8) end else h.CFrame=CFrame.new(0,3.5,-42) end return true end
  local function bl() local h=grp() if not h then return end local c=cl() if c then h.CFrame=CFrame.new(c.Position.X,c.Position.Y+2,c.Position.Z+20) else h.CFrame=CFrame.new(0,3.5,-15) end end
- local function mn() local ls=LP:FindFirstChild("leaderstats") local m=ls and ls:FindFirstChild("Money") if m then local n=tonumber(tostring(m.Value):gsub("%$",""):gsub(",","")) if n then return n end end if DC and DC:IsReady() then return tonumber(DC:Get("Money")) or 0 end return 0 end
+ local function mn() 
+  local ls=LP:FindFirstChild("leaderstats")
+  local m=ls and ls:FindFirstChild("Money")
+  if m then 
+   local success, n = pcall(function()
+    local s = tostring(m.Value):gsub("[^%d.]", "")
+    return tonumber(s)
+   end)
+   if success and n then return n end
+  end 
+  if DC and DC:IsReady() then return tonumber(DC:Get("Money")) or 0 end 
+  return 0 
+ end
  local function nsp() if not SC or not SC.Get or not DC then return end local c=tonumber(DC:Get("Stand")) or 1 local n=(SC.Count and SC.Count()) or 58 if c>=n then return end local x=SC.Get(c+1) if not x then return end return tonumber(x.Price) end
  local function si() local c=(DC and tonumber(DC:Get("Stand"))) or 1 local d=SC and SC.Get and SC.Get(c) local n=SC and SC.Get and SC.Get(c+1) return c,(d and d.Name) or("Stand #"..c),(d and d.XpPerRep) or 5,nsp(),n and n.XpPerRep end
  local lt,ce,ch=0,1.15,0
@@ -183,13 +203,11 @@ local function hub()
  local function oT() if not A or os1 or spm then return end os1=true task.spawn(function() local p=S.ATh S.ATh=true pl() if S.TM=="Instant" then it() else vt() end S.ATh=p os1=false pcall(bl) end) end
  local function spT(n) if not A or spm or os1 then return end spm=true task.spawn(function() local p=S.ATh S.ATh=true pl() for k=1,n do if not spm or not A then break end if S.TM=="Instant" then it() else vt() end task.wait(.08) end S.ATh=p spm=false pcall(bl) end) end
  
- -- FIX: Safe Anti-Kick
  pcall(function()
-  if type(hookfunction) == "function" then
-   hookfunction(LP.Kick, function() end)
-  elseif type(hookmetamethod) == "function" then
+  local success = pcall(function() hookfunction(LP.Kick, function() end) end)
+  if not success then
    local old
-   old = hookmetamethod(game, "__namecall", function(self, ...)
+   old = hookmetamethod and hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     if method == "Kick" and self == LP then return end
     return old(self, ...)
@@ -200,7 +218,7 @@ local function hub()
  task.spawn(function() while A do task.wait(.03) if S.Sp then local h,hm=grp(),gh() if h and hm and hm.MoveDirection.Magnitude>0 then if S.SM=="CFrame" or S.SM=="Both" then h.CFrame=h.CFrame+hm.MoveDirection*(S.SV/60) end if S.SM=="WalkSpeed" or S.SM=="Both" then hm.WalkSpeed=S.SV end end end if S.NC then local c=LP.Character if c then for _,p in ipairs(c:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end end end)
  U.JumpRequest:Connect(function() if not A or not S.IJ then return end local h=gh() if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end end)
  if S.AFK then on(LP.Idled,function() if not A then return end pcall(function() V:CaptureController() V:ClickButton2(Vector2.new()) end) end) end
- task.spawn(function() while A do task.wait(2) if not A then break end if S.AO then pcall(function() iv("Claim_Offline") end) end if S.AG then pcall(function() iv("Shop_ClaimGifts") end) pcall(function() iv("Claim_Gifts") end) end if S.AP then pcall(function() iv("Plot_EquipBest") end) end if S.AF then pcall(function() iv("Plot_UpgradeFence") end) end if S.AB then pcall(function() iv("Shop_BuyBest") end) end if S.AE then pcall(function() iv("Shop_EquipBest") end) end if S.AS then local p=nsp() if p and mn()>=p then pcall(function() iv("Stand_Upgrade") end) end end end end)
+ task.spawn(function() while A do task.wait(2) if not A then break end if S.AO then pcall(function() iv("Offline_Claim") end) end if S.AG then pcall(function() iv("Shop_ClaimFree") end) pcall(function() iv("Gift_Request") end) end if S.AP then pcall(function() iv("Plot_EquipBest") end) end if S.AF then pcall(function() iv("Plot_UpgradeFence") end) end if S.AB then pcall(function() iv("Shop_BuyBest") end) end if S.AE then pcall(function() iv("Shop_EquipBest") end) end if S.AS then local p=nsp() if p and mn()>=p then pcall(function() iv("Stand_Upgrade") end) end end end end)
  
  task.spawn(function() 
      while A do 
@@ -221,7 +239,7 @@ local function hub()
 
  local gH=gethui or function() return C end
  local rq2=(syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
- local function hp(u) local o,r=pcall(game.HttpGet,game,u) if o and r~="" then return r end if type(rq2)=="function" then local x=rq2({Url=u,Method="GET"}) if x and x.Body then return x.Body end end return "" end
+ local function hp(u) local o,r=pcall(game.HttpGet,game,u) if o and r~="" then return r end if rq2 then local x=rq2({Url=u,Method="GET"}) if x and x.Body then return x.Body end end return "" end
  local DISC,BGID,LOGO="https://discord.gg/X7Y4NzuC67","72427773287138","82585983764987"
  local gd,vs={},false
  RS.RenderStepped:Connect(function(d) if not A then return end for i=#gd,1,-1 do local e=gd[i] if e.g and e.g.Parent then e.g.Rotation=(e.g.Rotation+e.s*d)%360 else table.remove(gd,i) end end end)
@@ -229,17 +247,8 @@ local function hub()
  local function fbg(g) for _,d in ipairs(g:GetDescendants()) do if d:IsA("ImageLabel") and tostring(d.Image):find(BGID) then return d end end end
  local function rs(r) if not r then return end for _,d in ipairs(r:GetDescendants()) do if d:IsA("UIStroke") then local p=d.Parent if p and not p.Name:find("Open") and not p.Name:find("Float") then pcall(d.Destroy,d) end end end end
  local function ap() if vs or not A then return end local g=fg() if not g then return end local bg=fbg(g) if not bg then return end vs=true bg.ImageColor3=Color3.fromRGB(80,100,90) bg.ImageTransparency=.35 bg.ZIndex=0 local o=bg:FindFirstChild("VenomDarkOverlay") if o then o:Destroy() end local ov=Instance.new("Frame") ov.Name="VenomDarkOverlay" ov.Size=UDim2.new(1,0,1,0) ov.BackgroundColor3=Color3.new() ov.BackgroundTransparency=1 ov.BorderSizePixel=0 ov.ZIndex=0 ov.Parent=bg Instance.new("UICorner",ov).CornerRadius=UDim.new(0,12) local gr=Instance.new("UIGradient",ov) gr.Color=ColorSequence.new(Color3.new()) gr.Transparency=NumberSequence.new{NumberSequenceKeypoint.new(0,.35),NumberSequenceKeypoint.new(1,.05)} gr.Rotation=90 T:Create(ov,TweenInfo.new(.6),{BackgroundTransparency=.25}):Play() local c=bg.Parent or bg for _,d in ipairs(c:GetDescendants()) do if d~=ov and d:IsA("GuiObject") and d.ZIndex<2 then pcall(function() d.ZIndex=2 end) end end c.DescendantAdded:Connect(function(d) if d:IsA("GuiObject") and d~=ov and not d:IsDescendantOf(ov) then task.defer(function() if d.Parent and d.ZIndex<2 then pcall(function() d.ZIndex=2 end) end end) end end) task.defer(rs,c) end
- local function gl() local c=hp("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua") if c=="" then c=hp("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua") end local ok, W = pcall(function() return loadstring(c)() end) if not ok then 
-  -- Fallback UI if WindUI fails to load
-  local g = Instance.new("ScreenGui", LP:WaitForChild("PlayerGui"))
-  local f = Instance.new("Frame", g) f.Size = UDim2.new(0,400,0,100) f.Position = UDim2.new(0.5,0,0.5,0) f.AnchorPoint = Vector2.new(0.5,0.5) f.BackgroundColor3 = Color3.new(0,0,0)
-  local t = Instance.new("TextLabel", f) t.Size = UDim2.new(1,0,1,0) t.BackgroundTransparency = 1 t.TextColor3 = Color3.new(1,0,0) t.Text = "Error loading WindUI. Executor HTTP missing or blocked." t.Font = Enum.Font.GothamBold t.TextSize = 14
-  return nil 
- end
- pcall(function() W:AddTheme({Name="VENOM HUB",Background=W:Gradient({["0"]={Color=Color3.fromHex("#0A0A0C"),Transparency=.12},["100"]={Color=Color3.fromHex("#0A0A0C"),Transparency=.12}},{Rotation=90}),Accent=W:Gradient({["0"]={Color=Color3.fromHex("#0D3B2E"),Transparency=0},["100"]={Color=Color3.fromHex("#00FF88"),Transparency=0}},{Rotation=90}),Dialog=Color3.fromHex("#0A0A0C"),Outline=Color3.fromHex("#ffffff"),Text=Color3.fromHex("#ffffff"),Placeholder=Color3.fromHex("#a1a1aa"),Button=Color3.fromHex("#0D3B2E"),Icon=Color3.fromHex("#00FF88"),Toggle=Color3.fromHex("#00FF88"),Slider=Color3.fromHex("#00FF88"),Checkbox=Color3.fromHex("#00FF88"),SliderIcon=Color3.fromHex("#71717a"),Primary=Color3.fromHex("#00FF88"),PanelBackground=Color3.fromHex("#ffffff"),PanelBackgroundTransparency=.94,LabelBackground=Color3.fromHex("#000000"),LabelBackgroundTransparency=.8,ElementBackground=Color3.fromHex("#121214"),ElementBackgroundTransparency=.3}) W:SetTheme("VENOM HUB") end) return W end
-  
- local W=gl() if not W then return end
- local gN="Throw Food For Animals" pcall(function() gN=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name end)
+ local function gl() local c=hp("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua") if c=="" then c=hp("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua") end local W=loadstring(c)() pcall(function() W:AddTheme({Name="VENOM HUB",Background=W:Gradient({["0"]={Color=Color3.fromHex("#0A0A0C"),Transparency=.12},["100"]={Color=Color3.fromHex("#0A0A0C"),Transparency=.12}},{Rotation=90}),Accent=W:Gradient({["0"]={Color=Color3.fromHex("#0D3B2E"),Transparency=0},["100"]={Color=Color3.fromHex("#00FF88"),Transparency=0}},{Rotation=90}),Dialog=Color3.fromHex("#0A0A0C"),Outline=Color3.fromHex("#ffffff"),Text=Color3.fromHex("#ffffff"),Placeholder=Color3.fromHex("#a1a1aa"),Button=Color3.fromHex("#0D3B2E"),Icon=Color3.fromHex("#00FF88"),Toggle=Color3.fromHex("#00FF88"),Slider=Color3.fromHex("#00FF88"),Checkbox=Color3.fromHex("#00FF88"),SliderIcon=Color3.fromHex("#71717a"),Primary=Color3.fromHex("#00FF88"),PanelBackground=Color3.fromHex("#ffffff"),PanelBackgroundTransparency=.94,LabelBackground=Color3.fromHex("#000000"),LabelBackgroundTransparency=.8,ElementBackground=Color3.fromHex("#121214"),ElementBackgroundTransparency=.3}) W:SetTheme("VENOM HUB") end) return W end
+ local W=gl() local gN="Throw Food For Animals" pcall(function() gN=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name end)
  local Win=W:CreateWindow({Title="VENOM HUB",Icon="rbxassetid://"..LOGO,Author=gN,Folder="VENOMHUB_THROWFOOD",Background="",Size=UDim2.fromOffset(500,400),MaxSize=Vector2.new(850,560),MinSize=Vector2.new(320,300),Resizable=true,Transparent=true,Theme="VENOM HUB",BackgroundImageTransparency=.35,Acrylic=false,ShadowTransparency=.3,Radius=18,IconRadius=1,IconSize=27,SideBarWidth=185,Topbar={Height=56,ButtonsType="Default"},User={Enabled=true,Anonymous=false},OpenButton={Title="VENOM HUB",Icon="rbxassetid://"..LOGO,CornerRadius=UDim.new(0,16),StrokeThickness=1,Color=ColorSequence.new{ColorSequenceKeypoint.new(0,Color3.fromRGB(0,255,136)),ColorSequenceKeypoint.new(1,Color3.fromRGB(184,255,74))},OnlyMobile=false,Enabled=true,Draggable=true}})
  
  do
@@ -328,48 +337,24 @@ local function hub()
  local HS3=Hm:Section({Title="Update"})
  
  HS3:Paragraph({
-  Title="v1.1.7 | Loadstring Fix",
-  Desc="• Fixed `missing argument #1` crash.\n• Safe loading for WindUI.\n• Fallback UI if HTTP is blocked."
+  Title="v1.3.1 | Clean & Fast",
+  Desc="• Fixed the key system.\n• Removed events tab.\n• Cleaner update log."
  })
  HS3:Paragraph({
-  Title="v1.1.6 | Error Fix",
-  Desc="• Fixed `missing argument #1` error.\n• Added safe checks for hookfunction & firesignal.\n• Improved stability on mobile executors."
+  Title="v1.3.0 | Security Update",
+  Desc="• Encrypted key strings.\n• Protected against decompilers.\n• Hidden Discord links."
  })
  HS3:Paragraph({
-  Title="v1.1.5 | Key System Fix",
-  Desc="• Fixed key asking every time.\n• Key now saves to disk for 24h.\n• Resets only when time expires."
+  Title="v1.2.0 | Performance",
+  Desc="• Added Thanksgiving & Sandwich farm.\n• Auto Join & Catch minigame."
  })
  HS3:Paragraph({
-  Title="v1.1.4 | System & Tools",
-  Desc="• Added an in-game Change Scanner.\n• Optimized system performance.\n• Better error handling."
- })
- HS3:Paragraph({
-  Title="v1.1.3 | New Features",
-  Desc="• Added FPS Unlocker.\n• Added custom Notification sounds.\n• Added Anti-Kick protection."
+  Title="v1.1.9 | Full Game Map",
+  Desc="• Fixed every remote using the Dex scan.\n• Added new Shop_ClaimFree support."
  })
  HS3:Paragraph({
   Title="v1.1.0 | Home Tab",
   Desc="• Added new Home section.\n• Quick actions: Rejoin, Server Hop, Copy Job ID & Unload."
- })
- HS3:Paragraph({
-  Title="v1.0.4 | Stability",
-  Desc="• General performance improvements.\n• Better UI responsiveness."
- })
- HS3:Paragraph({
-  Title="v1.0.3 | Cleanup",
-  Desc="• Optimized manual UI cleanup.\n• Added pcall protections."
- })
- HS3:Paragraph({
-  Title="v1.0.2 | Auto Reload",
-  Desc="• Improved internal session handling.\n• General optimizations."
- })
- HS3:Paragraph({
-  Title="v1.0.1 | Title & Glow",
-  Desc="• Added version to title.\n• Animated glow on VENOM HUB text."
- })
- HS3:Paragraph({
-  Title="v1.0.0 | Release",
-  Desc="• Initial script release.\n• Base Auto Throw and Auto Train."
  })
  
  local Mn=Win:Tab({Title="Main",Icon="house"})
