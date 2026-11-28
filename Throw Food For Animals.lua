@@ -1,6 +1,6 @@
 -- VENOM HUB | key: VENOM-HUB-8492-7316 | 24h
 -- Locked to Game: Throw Food For Animals
--- Version: v1.3.1
+-- Version: v1.3.2
 
 local isCorrectGame = false
 pcall(function()
@@ -23,15 +23,19 @@ end
 local P,S,R,U,V,T,C,L,St=game:GetService("Players"),game:GetService("SoundService"),game:GetService("ReplicatedStorage"),game:GetService("UserInputService"),game:GetService("VirtualUser"),game:GetService("TweenService"),game:GetService("CoreGui"),game:GetService("Lighting"),game:GetService("Stats")
 local Ws,RS,LP=game:GetService("Workspace"),game:GetService("RunService"),P.LocalPlayer
 local KEY,DC,DUR="VENOM-HUB-8492-7316","https://discord.gg/upsFFfUbCY",86400
-local VERSION="v1.3.1"
+local VERSION="v1.3.2"
 
 local function rd()
+ local timeSaved = nil
  pcall(function()
   if readfile and isfile and isfile(".venom_key") then
-   return tonumber(readfile(".venom_key"))
+   timeSaved = tonumber(readfile(".venom_key"))
   end
  end)
- return tonumber(LP:GetAttribute("VK"))
+ if not timeSaved then
+  pcall(function() timeSaved = tonumber(LP:GetAttribute("VK")) end)
+ end
+ return timeSaved
 end
 
 local function wr(t)
@@ -336,6 +340,10 @@ local function hub()
  
  local HS3=Hm:Section({Title="Update"})
  
+ HS3:Paragraph({
+  Title="v1.3.2 | Key Duration Fix",
+  Desc="• Fixed a bug where the key would ask again before 24h.\n• Key now saves correctly to your executor disk."
+ })
  HS3:Paragraph({
   Title="v1.3.1 | Clean & Fast",
   Desc="• Fixed the key system.\n• Removed events tab.\n• Cleaner update log."
