@@ -1,6 +1,6 @@
 -- VENOM HUB | key: VENOM-HUB-8492-7316 | 24h
 -- Locked to Game: Throw Food For Animals
--- Version: v1.3.2
+-- Version: v1.3.3
 
 local isCorrectGame = false
 pcall(function()
@@ -23,7 +23,7 @@ end
 local P,S,R,U,V,T,C,L,St=game:GetService("Players"),game:GetService("SoundService"),game:GetService("ReplicatedStorage"),game:GetService("UserInputService"),game:GetService("VirtualUser"),game:GetService("TweenService"),game:GetService("CoreGui"),game:GetService("Lighting"),game:GetService("Stats")
 local Ws,RS,LP=game:GetService("Workspace"),game:GetService("RunService"),P.LocalPlayer
 local KEY,DC,DUR="VENOM-HUB-8492-7316","https://discord.gg/upsFFfUbCY",86400
-local VERSION="v1.3.2"
+local VERSION="v1.3.3"
 
 local function rd()
  local timeSaved = nil
@@ -115,7 +115,16 @@ local function hub()
   if on then 
       sv() 
       pcall(function() L.GlobalShadows=false L.Brightness=1 L.FogEnd=1e6 L.EnvironmentDiffuseScale=0 L.EnvironmentSpecularScale=0 settings().Rendering.QualityLevel=Enum.QualityLevel.Level01 end)
-      pcall(function() for _,v in ipairs(Ws:GetDescendants()) do if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Light") or v:IsA("Texture") then v:Destroy() elseif v:IsA("Explosion") then v:Destroy() end end end)
+      
+      -- AGRESSIVE OPTIMIZER (REMOVES ALL VISUAL EFFECTS)
+      pcall(function() 
+          for _,v in ipairs(Ws:GetDescendants()) do 
+              if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Light") or v:IsA("Texture") or v:IsA("Decal") or v:IsA("Beam") or v:IsA("Highlight") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("SunRaysEffect") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("Explosion") then 
+                  v:Destroy() 
+              end 
+          end 
+      end)
+      
       pcall(function() local t=Ws:FindFirstChildOfClass("Terrain") if t then t.Decoration=false t.WaterWaveSize=0 t.WaterReflectance=0 end end)
   else 
       pcall(function() if oL.GS~=nil then L.GlobalShadows=oL.GS end if oL.BR then L.Brightness=oL.BR end if oL.FE then L.FogEnd=oL.FE end settings().Rendering.QualityLevel=Enum.QualityLevel.Automatic end) 
@@ -341,6 +350,10 @@ local function hub()
  local HS3=Hm:Section({Title="Update"})
  
  HS3:Paragraph({
+  Title="v1.3.3 | Optimizer Update",
+  Desc="• Optimizer now removes ALL visual effects for max FPS."
+ })
+ HS3:Paragraph({
   Title="v1.3.2 | Key Duration Fix",
   Desc="• Fixed a bug where the key would ask again before 24h.\n• Key now saves correctly to your executor disk."
  })
@@ -355,14 +368,6 @@ local function hub()
  HS3:Paragraph({
   Title="v1.2.0 | Performance",
   Desc="• Added Thanksgiving & Sandwich farm.\n• Auto Join & Catch minigame."
- })
- HS3:Paragraph({
-  Title="v1.1.9 | Full Game Map",
-  Desc="• Fixed every remote using the Dex scan.\n• Added new Shop_ClaimFree support."
- })
- HS3:Paragraph({
-  Title="v1.1.0 | Home Tab",
-  Desc="• Added new Home section.\n• Quick actions: Rejoin, Server Hop, Copy Job ID & Unload."
  })
  
  local Mn=Win:Tab({Title="Main",Icon="house"})
